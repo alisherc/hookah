@@ -744,3 +744,39 @@ if (urlParams.get('admin') === 'true') {
     adminBtn.onclick = () => window.location.href = 'admin.html';
     document.body.appendChild(adminBtn);
 }
+
+// Фикс для мобильных устройств
+document.addEventListener('DOMContentLoaded', function() {
+    // Предотвращаем горизонтальный скролл на мобильных
+    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Форсируем стили для body и html
+        document.body.style.overflowX = 'hidden';
+        document.body.style.maxWidth = '100vw';
+        document.documentElement.style.overflowX = 'hidden';
+        document.documentElement.style.maxWidth = '100vw';
+        
+        // Фикс для iOS Safari
+        document.body.style.webkitOverflowScrolling = 'touch';
+        
+        // Убираем возможность масштабирования жестами на iOS
+        document.addEventListener('gesturestart', function (e) {
+            e.preventDefault();
+        });
+        
+        // Дополнительный фикс для скроллбаров в emoji селекторах
+        const emojiTabs = document.querySelector('.emoji-tabs');
+        const emojiGrid = document.querySelector('.emoji-grid');
+        
+        if (emojiTabs) {
+            emojiTabs.style.scrollbarWidth = 'none';
+            emojiTabs.style.msOverflowStyle = 'none';
+            emojiTabs.style.webkitScrollbar = 'none';
+        }
+        
+        if (emojiGrid) {
+            emojiGrid.style.scrollbarWidth = 'none';
+            emojiGrid.style.msOverflowStyle = 'none';
+            emojiGrid.style.webkitScrollbar = 'none';
+        }
+    }
+});
