@@ -313,6 +313,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.article:first-child').forEach(el => {
         setTimeout(() => el.classList.add('visible'), 100);
     });
+    
+    // Обновляем счетчик подписей после полной загрузки DOM
+    updateSignaturesCount();
 });
 
 // Добавляем случайные искры
@@ -625,6 +628,8 @@ try {
         isAuthenticated = true;
         signaturesList.style.display = 'grid';
         viewSignaturesBtn.style.display = 'none';
+        // Обновляем счетчик когда уже авторизованы
+        setTimeout(() => updateSignaturesCount(), 100);
     }
 } catch (error) {
     console.error('Error accessing localStorage:', error);
@@ -634,7 +639,10 @@ try {
 // Функция для обновления счетчика подписей (работает независимо от авторизации)
 async function updateSignaturesCount() {
     const countElement = document.getElementById('signaturesCount');
-    if (!countElement) return;
+    if (!countElement) {
+        console.error('Signatures count element not found');
+        return;
+    }
     
     try {
         const snapshot = await db.collection('signatures').get();
@@ -648,7 +656,7 @@ async function updateSignaturesCount() {
         }, 100);
     } catch (error) {
         console.error('Error loading signatures count:', error);
-        countElement.textContent = '?';
+        countElement.textContent = '0';
     }
 }
 
@@ -662,6 +670,7 @@ async function loadSignatures() {
         
         if (snapshot.empty) {
             signaturesList.innerHTML = '<div class="loading">Пока никто не подписал кодекс. Будь первым!</div>';
+            updateSignaturesCount(); // Обновляем счетчик даже при пустой коллекции
             return;
         }
         
@@ -693,6 +702,9 @@ async function loadSignatures() {
         }
         
         signaturesCache = newSignatures;
+        
+        // Обновляем счетчик после загрузки подписей
+        updateSignaturesCount();
         
     } catch (error) {
         console.error('Error loading signatures:', error);
@@ -756,9 +768,11 @@ window.addEventListener('resize', () => {
 
 setupCanvas();
 
-// Загружаем счетчик подписей сразу (для всех пользователей)
-updateSignaturesCount();
-setInterval(updateSignaturesCount, 30000);
+// Загружаем счетчик подписей после небольшой задержки для инициализации Firebase
+setTimeout(() => {
+    updateSignaturesCount();
+    setInterval(updateSignaturesCount, 30000);
+}, 500);
 
 // Загружаем сами подписи только для авторизованных
 if (isAuthenticated) {
@@ -809,4 +823,7 @@ document.addEventListener('DOMContentLoaded', function() {
             emojiGrid.style.webkitScrollbar = 'none';
         }
     }
+    
+    // Обновляем счетчик еще раз после полной загрузки страницы
+    updateSignaturesCount();
 });
