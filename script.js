@@ -13,13 +13,37 @@ const db = firebase.firestore();
 const canvas = document.getElementById('signatureCanvas');
 const ctx = canvas.getContext('2d');
 const nameInput = document.getElementById('signatureName');
+const surnameInput = document.getElementById('signatureSurname');
 const submitBtn = document.getElementById('submitBtn');
 const clearBtn = document.getElementById('clearBtn');
 const signaturesList = document.getElementById('signaturesList');
 const canvasWrapper = document.querySelector('.canvas-wrapper');
+const viewSignaturesBtn = document.getElementById('viewSignaturesBtn');
+const passwordModal = document.getElementById('passwordModal');
+const passwordInput = document.getElementById('passwordInput');
+const passwordSubmit = document.getElementById('passwordSubmit');
+const passwordCancel = document.getElementById('passwordCancel');
 
 let isDrawing = false;
 let hasSignature = false;
+let selectedEmoji = null;
+let signaturesCache = [];
+let isAuthenticated = false;
+
+function vibrate(duration = 10) {
+    if ('vibrate' in navigator) {
+        navigator.vibrate(duration);
+    }
+}
+
+document.querySelectorAll('.emoji-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedEmoji = btn.dataset.emoji;
+        vibrate(20);
+    });
+});
 
 function setupCanvas() {
     const rect = canvas.getBoundingClientRect();
@@ -60,6 +84,7 @@ function startDrawing(e) {
     if (!hasSignature) {
         hasSignature = true;
         canvasWrapper.classList.add('active');
+        vibrate(5);
     }
 }
 
@@ -116,14 +141,42 @@ function showError(message) {
     errorDiv.textContent = message;
     
     document.querySelector('.signature-form').insertBefore(errorDiv, document.querySelector('.signature-form').firstChild);
+    vibrate([50, 30, 50]);
     
     setTimeout(() => {
         errorDiv.remove();
     }, 3000);
 }
 
+function createParticles(x, y) {
+    const particlesContainer = document.getElementById('particles');
+    
+    for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = x + 'px';
+        particle.style.top = y + 'px';
+        particle.style.setProperty('--random-x', (Math.random() - 0.5) * 100 + 'px');
+        particlesContainer.appendChild(particle);
+        
+        setTimeout(() => particle.remove(), 3000);
+    }
+}
+
+function showSuccessAnimation(emoji) {
+    const animation = document.createElement('div');
+    animation.className = 'success-animation';
+    animation.textContent = emoji || '✨';
+    document.body.appendChild(animation);
+    
+    vibrate([100, 50, 100]);
+    
+    setTimeout(() => animation.remove(), 1000);
+}
+
 async function submitSignature() {
     const name = nameInput.value.trim();
+    const surname = surnameInput.value.trim();
     
     if (!name) {
         showError('Введи своё имя!');
@@ -131,8 +184,14 @@ async function submitSignature() {
         return;
     }
     
-    if (name.length > 50) {
-        showError('Имя слишком длинное!');
+    if (!surname) {
+        showError('Введи свою фамилию!');
+        surnameInput.focus();
+        return;
+    }
+    
+    if (!selectedEmoji) {
+        showError('Выбери emoji!');
         return;
     }
     
@@ -147,54 +206,48 @@ async function submitSignature() {
     try {
         const signatureDataUrl = canvas.toDataURL('image/png');
         
-        if (signatureDataUrl.length > 1048576) {
-            showError('Подпись слишком сложная, попробуй проще');
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Подписать';
-            return;
-        }
-        
-        const ipResponse = await fetch('https://api.ipify.org?format=json').catch(() => null);
-        const ipData = ipResponse ? await ipResponse.json().catch(() => null) : null;
-        const ip = ipData?.ip || 'unknown';
-        
-        const existingSignatures = await db.collection('signatures')
-            .where('ip', '==', ip)
-            .get();
-        
-        if (existingSignatures.size >= 3) {
-            showError('Достигнут лимит подписей с одного IP');
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Подписать';
-            return;
-        }
+        const signaturesCount = await db.collection('signatures').get();
+        const orderNumber = signaturesCount.size + 1;
         
         await db.collection('signatures').add({
             name: name,
+            surname: surname,
+            emoji: selectedEmoji,
             signature: signatureDataUrl,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            ip: ip
+            orderNumber: orderNumber,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
         
         nameInput.value = '';
+        surnameInput.value = '';
         clearCanvas();
+        document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
+        selectedEmoji = null;
+        
+        const rect = submitBtn.getBoundingClientRect();
+        createParticles(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        showSuccessAnimation(selectedEmoji);
         
         const successDiv = document.createElement('div');
         successDiv.style.cssText = `
-            background: rgba(0, 255, 0, 0.1);
-            border: 1px solid rgba(0, 255, 0, 0.3);
-            padding: 10px;
-            border-radius: 5px;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(244, 228, 160, 0.1));
+            border: 2px solid var(--gold);
+            padding: 15px;
+            border-radius: 10px;
             margin-bottom: 15px;
-            color: #4ade80;
+            color: var(--gold);
             text-align: center;
+            font-weight: 600;
+            animation: fadeIn 0.5s ease;
         `;
-        successDiv.textContent = 'Подпись успешно добавлена!';
+        successDiv.textContent = `Поздравляю! Ты теперь #${orderNumber} в кодексе!`;
         document.querySelector('.signature-form').insertBefore(successDiv, document.querySelector('.signature-form').firstChild);
         
-        setTimeout(() => successDiv.remove(), 3000);
+        setTimeout(() => successDiv.remove(), 5000);
         
-        loadSignatures();
+        if (isAuthenticated) {
+            loadSignatures();
+        }
         
     } catch (error) {
         console.error('Error:', error);
@@ -207,18 +260,73 @@ async function submitSignature() {
 
 submitBtn.addEventListener('click', submitSignature);
 
-nameInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        submitSignature();
+async function checkPassword(password) {
+    try {
+        const configDoc = await db.collection('config').doc('settings').get();
+        if (configDoc.exists) {
+            const data = configDoc.data();
+            return password === data.viewPassword;
+        }
+        return password === 'hookah2025';
+    } catch (error) {
+        console.error('Error checking password:', error);
+        return password === 'hookah2025';
+    }
+}
+
+viewSignaturesBtn.addEventListener('click', () => {
+    if (isAuthenticated) {
+        signaturesList.style.display = 'grid';
+        viewSignaturesBtn.style.display = 'none';
+    } else {
+        passwordModal.classList.add('active');
+        passwordInput.focus();
     }
 });
 
+passwordSubmit.addEventListener('click', async () => {
+    const password = passwordInput.value;
+    
+    if (await checkPassword(password)) {
+        isAuthenticated = true;
+        passwordModal.classList.remove('active');
+        signaturesList.style.display = 'grid';
+        viewSignaturesBtn.style.display = 'none';
+        loadSignatures();
+        
+        localStorage.setItem('hookah_auth', 'true');
+        localStorage.setItem('hookah_auth_time', Date.now());
+    } else {
+        showError('Неверный пароль!');
+        passwordInput.value = '';
+    }
+});
+
+passwordCancel.addEventListener('click', () => {
+    passwordModal.classList.remove('active');
+    passwordInput.value = '';
+});
+
+passwordInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        passwordSubmit.click();
+    }
+});
+
+const authCache = localStorage.getItem('hookah_auth');
+const authTime = localStorage.getItem('hookah_auth_time');
+if (authCache === 'true' && authTime && (Date.now() - parseInt(authTime) < 3600000)) {
+    isAuthenticated = true;
+    signaturesList.style.display = 'grid';
+    viewSignaturesBtn.style.display = 'none';
+}
+
 async function loadSignatures() {
+    if (!isAuthenticated) return;
+    
     try {
         const snapshot = await db.collection('signatures')
-            .orderBy('timestamp', 'desc')
-            .limit(100)
+            .orderBy('orderNumber', 'asc')
             .get();
         
         if (snapshot.empty) {
@@ -226,13 +334,34 @@ async function loadSignatures() {
             return;
         }
         
-        signaturesList.innerHTML = '';
-        
+        const newSignatures = [];
         snapshot.forEach(doc => {
-            const data = doc.data();
-            const card = createSignatureCard(data);
-            signaturesList.appendChild(card);
+            newSignatures.push({ id: doc.id, ...doc.data() });
         });
+        
+        const existingIds = new Set(signaturesCache.map(s => s.id));
+        const newIds = new Set(newSignatures.map(s => s.id));
+        
+        if (JSON.stringify([...existingIds].sort()) === JSON.stringify([...newIds].sort()) && signaturesCache.length > 0) {
+            return;
+        }
+        
+        const addedSignatures = newSignatures.filter(s => !existingIds.has(s.id));
+        
+        if (signaturesCache.length === 0) {
+            signaturesList.innerHTML = '';
+            newSignatures.forEach(data => {
+                const card = createSignatureCard(data);
+                signaturesList.appendChild(card);
+            });
+        } else {
+            addedSignatures.forEach(data => {
+                const card = createSignatureCard(data);
+                signaturesList.appendChild(card);
+            });
+        }
+        
+        signaturesCache = newSignatures;
         
     } catch (error) {
         console.error('Error loading signatures:', error);
@@ -243,6 +372,7 @@ async function loadSignatures() {
 function createSignatureCard(data) {
     const card = document.createElement('div');
     card.className = 'signature-card';
+    card.dataset.id = data.id;
     
     const date = data.timestamp ? data.timestamp.toDate() : new Date();
     const dateStr = date.toLocaleDateString('ru-RU', {
@@ -253,8 +383,12 @@ function createSignatureCard(data) {
         minute: '2-digit'
     });
     
+    const orderClass = data.orderNumber <= 5 ? 'founder' : '';
+    
     card.innerHTML = `
-        <div class="signature-card-name">${escapeHtml(data.name)}</div>
+        <div class="signature-order-number ${orderClass}">#${data.orderNumber}</div>
+        <div class="signature-emoji">${data.emoji || '😎'}</div>
+        <div class="signature-card-name">${escapeHtml(data.name)} ${escapeHtml(data.surname || '')}</div>
         <img src="${data.signature}" alt="Подпись" class="signature-card-image">
         <div class="signature-card-date">${dateStr}</div>
     `;
@@ -281,6 +415,17 @@ window.addEventListener('resize', () => {
 });
 
 setupCanvas();
-loadSignatures();
 
-setInterval(loadSignatures, 30000);
+if (isAuthenticated) {
+    loadSignatures();
+    setInterval(loadSignatures, 30000);
+}
+
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('admin') === 'true') {
+    const adminBtn = document.createElement('button');
+    adminBtn.textContent = '🔧';
+    adminBtn.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 9999; background: var(--gold); border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 24px; cursor: pointer;';
+    adminBtn.onclick = () => window.location.href = 'admin.html';
+    document.body.appendChild(adminBtn);
+}

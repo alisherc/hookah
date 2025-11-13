@@ -166,7 +166,7 @@ body {
     margin: 0 auto;
 }
 
-#signatureName {
+#signatureName, #signatureSurname {
     width: 100%;
     padding: 15px;
     font-size: 18px;
@@ -178,14 +178,63 @@ body {
     transition: all 0.3s ease;
 }
 
-#signatureName:focus {
+#signatureName:focus, #signatureSurname:focus {
     outline: none;
     border-color: var(--accent-color);
     background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 20px rgba(233, 69, 96, 0.3);
 }
 
-#signatureName::placeholder {
+#signatureName::placeholder, #signatureSurname::placeholder {
     color: rgba(245, 245, 245, 0.5);
+}
+
+.emoji-selector {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.emoji-label {
+    text-align: center;
+    margin-bottom: 15px;
+    color: rgba(245, 245, 245, 0.8);
+    font-weight: 500;
+}
+
+.emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+}
+
+.emoji-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid transparent;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.emoji-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.emoji-btn.selected {
+    border-color: var(--accent-color);
+    background: rgba(233, 69, 96, 0.2);
+    animation: emojiPulse 0.5s ease;
+}
+
+@keyframes emojiPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3) rotate(10deg); }
+    100% { transform: scale(1); }
 }
 
 .canvas-wrapper {
@@ -293,6 +342,53 @@ body {
     transition: all 0.3s ease;
     border: 1px solid rgba(255, 255, 255, 0.1);
     animation: fadeIn 0.5s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.signature-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(233, 69, 96, 0.1) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.signature-card:hover::before {
+    opacity: 1;
+}
+
+.signature-order-number {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, var(--gold), #f4e4a0);
+    color: var(--primary-color);
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.4);
+}
+
+.signature-order-number.founder {
+    background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+    animation: shine 2s infinite;
+}
+
+@keyframes shine {
+    0%, 100% { box-shadow: 0 2px 8px rgba(255, 107, 107, 0.4); }
+    50% { box-shadow: 0 2px 20px rgba(255, 107, 107, 0.8); }
+}
+
+.signature-emoji {
+    font-size: 28px;
+    margin-bottom: 10px;
 }
 
 @keyframes fadeIn {
@@ -338,6 +434,114 @@ body {
     padding: 40px 20px;
     color: rgba(245, 245, 245, 0.5);
     font-size: 14px;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    padding: 30px;
+    border-radius: 20px;
+    border: 2px solid var(--accent-color);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-content h3 {
+    margin-bottom: 20px;
+    color: var(--gold);
+    text-align: center;
+}
+
+#passwordInput {
+    width: 100%;
+    padding: 15px;
+    font-size: 18px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    color: var(--text-light);
+    margin-bottom: 20px;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.view-signatures-btn {
+    display: block;
+    margin: 0 auto 30px;
+    max-width: 300px;
+}
+
+.particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--gold);
+    border-radius: 50%;
+    opacity: 0;
+    animation: particleFloat 3s ease-out;
+}
+
+@keyframes particleFloat {
+    0% {
+        transform: translateY(0) translateX(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100px) translateX(var(--random-x));
+        opacity: 0;
+    }
+}
+
+.success-animation {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 100px;
+    z-index: 2000;
+    animation: successPop 1s ease;
+}
+
+@keyframes successPop {
+    0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); }
+    50% { transform: translate(-50%, -50%) scale(1.5) rotate(180deg); }
+    100% { transform: translate(-50%, -50%) scale(0) rotate(360deg); opacity: 0; }
 }
 
 @media (max-width: 768px) {

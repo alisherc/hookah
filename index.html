@@ -107,6 +107,23 @@
             
             <div class="signature-form">
                 <input type="text" id="signatureName" placeholder="Твоё имя" maxlength="50">
+                <input type="text" id="signatureSurname" placeholder="Твоя фамилия" maxlength="50">
+                
+                <div class="emoji-selector">
+                    <p class="emoji-label">Выбери свой vibe:</p>
+                    <div class="emoji-grid">
+                        <button class="emoji-btn" data-emoji="😎">😎</button>
+                        <button class="emoji-btn" data-emoji="🔥">🔥</button>
+                        <button class="emoji-btn" data-emoji="💨">💨</button>
+                        <button class="emoji-btn" data-emoji="👑">👑</button>
+                        <button class="emoji-btn" data-emoji="🌙">🌙</button>
+                        <button class="emoji-btn" data-emoji="⚡">⚡</button>
+                        <button class="emoji-btn" data-emoji="💎">💎</button>
+                        <button class="emoji-btn" data-emoji="🎯">🎯</button>
+                        <button class="emoji-btn" data-emoji="🚀">🚀</button>
+                        <button class="emoji-btn" data-emoji="🌟">🌟</button>
+                    </div>
+                </div>
                 
                 <div class="canvas-wrapper">
                     <canvas id="signatureCanvas"></canvas>
@@ -122,10 +139,24 @@
 
         <section class="signatures-list">
             <h2 class="list-title">Подписавшие кодекс</h2>
-            <div id="signaturesList" class="signatures-grid">
+            <button id="viewSignaturesBtn" class="btn btn-primary view-signatures-btn">Посмотреть подписи 🔒</button>
+            <div id="signaturesList" class="signatures-grid" style="display: none;">
                 <div class="loading">Загрузка подписей...</div>
             </div>
         </section>
+        
+        <div id="passwordModal" class="modal">
+            <div class="modal-content">
+                <h3>Введи пароль</h3>
+                <input type="password" id="passwordInput" placeholder="Пароль">
+                <div class="modal-buttons">
+                    <button id="passwordSubmit" class="btn btn-primary">Войти</button>
+                    <button id="passwordCancel" class="btn btn-secondary">Отмена</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="particles" class="particles"></div>
     </main>
 
     <footer class="footer">
