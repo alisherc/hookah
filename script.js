@@ -30,18 +30,61 @@ let selectedEmoji = null;
 let signaturesCache = [];
 let isAuthenticated = false;
 
+const emojiCategories = {
+    popular: ['😎', '🔥', '💨', '👑', '🌙', '⚡', '💎', '🎯', '🚀', '🌟', '😍', '🥰', '😘', '🤩', '😏', '😜', '🤪', '🤓', '😂', '🤣', '😊', '😇', '🙃', '😉', '😌', '😋', '😛', '🤗', '🤔', '🤫'],
+    smileys: ['😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃', '😉', '😊', '😇', '🥰', '😍', '🤩', '😘', '😗', '😚', '😙', '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '😮‍💨', '🤥', '😌', '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮', '🤧', '🥵', '🥶', '🥴', '😵', '😵‍💫', '🤯', '🤠', '🥳', '😎', '🤓', '🧐'],
+    animals: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐻‍❄️', '🐨', '🐯', '🦁', '🐮', '🐷', '🐽', '🐸', '🐵', '🙈', '🙉', '🙊', '🐒', '🐔', '🐧', '🐦', '🐤', '🐣', '🐥', '🦆', '🦅', '🦉', '🦇', '🐺', '🐗', '🐴', '🦄', '🐝', '🪱', '🐛', '🦋', '🐌', '🐞', '🐜', '🪰', '🪲', '🪳', '🦟', '🦗', '🕷️', '🦂', '🐢', '🐍', '🦎', '🦖', '🦕', '🐙', '🦑', '🦐', '🦀', '🦞', '🐠', '🐟', '🐡', '🦈', '🐳', '🐋', '🐬', '🦭', '🐊', '🐅', '🐆', '🦓', '🦍', '🦧', '🦣', '🐘', '🦛', '🦏', '🐪', '🐫', '🦒', '🦘', '🦬', '🐃', '🐂', '🐄', '🐎', '🐖', '🐏', '🐑', '🦙', '🐐', '🦌', '🐕', '🐩', '🦮', '🐕‍🦺', '🐈', '🐈‍⬛', '🪶', '🐓', '🦃', '🦤', '🦚', '🦜', '🦢', '🦩', '🕊️', '🐇', '🦝', '🦨', '🦡', '🦫', '🦦', '🦥', '🐁', '🐀', '🐿️', '🦔'],
+    food: ['🍏', '🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🫐', '🍈', '🍒', '🍑', '🥭', '🍍', '🥥', '🥝', '🍅', '🍆', '🥑', '🥦', '🥬', '🥒', '🌶️', '🫑', '🌽', '🥕', '🫒', '🧄', '🧅', '🥔', '🍠', '🥐', '🥖', '🥨', '🧀', '🥚', '🍳', '🧈', '🥞', '🧇', '🥓', '🥩', '🍗', '🍖', '🌭', '🍔', '🍟', '🍕', '🫓', '🥪', '🥙', '🧆', '🌮', '🌯', '🫔', '🥗', '🥘', '🫕', '🥫', '🍝', '🍜', '🍲', '🍛', '🍣', '🍱', '🥟', '🦪', '🍤', '🍙', '🍚', '🍘', '🍥', '🥠', '🥮', '🍢', '🍡', '🍧', '🍨', '🍦', '🥧', '🧁', '🍰', '🎂', '🍮', '🍭', '🍬', '🍫', '🍿', '🍩', '🍪', '🌰', '🥜', '🍯', '🥛', '🍼', '🫖', '☕', '🍵', '🧃', '🥤', '🧋', '🍶', '🍺', '🍻', '🥂', '🍷', '🥃', '🍸', '🍹', '🧉', '🍾'],
+    nature: ['🌵', '🎄', '🌲', '🌳', '🌴', '🪵', '🌱', '🌿', '☘️', '🍀', '🎍', '🪴', '🎋', '🍃', '🍂', '🍁', '🍄', '🐚', '🪨', '🌾', '💐', '🌷', '🌹', '🥀', '🌺', '🌸', '🌼', '🌻', '🌞', '🌝', '🌛', '🌜', '🌚', '🌕', '🌖', '🌗', '🌘', '🌑', '🌒', '🌓', '🌔', '🌙', '🌎', '🌍', '🌏', '🪐', '💫', '⭐', '🌟', '✨', '⚡', '☄️', '💥', '🔥', '🌪️', '🌈', '☀️', '🌤️', '⛅', '🌥️', '☁️', '🌦️', '🌧️', '⛈️', '🌩️', '🌨️', '❄️', '☃️', '⛄', '🌬️', '💨', '💧', '💦', '🫧', '☔', '☂️', '🌊', '🌫️'],
+    objects: ['⌚', '📱', '📲', '💻', '⌨️', '🖥️', '🖨️', '🖱️', '🖲️', '🕹️', '🗜️', '💽', '💾', '💿', '📀', '📼', '📷', '📸', '📹', '🎥', '📽️', '🎞️', '📞', '☎️', '📟', '📠', '📺', '📻', '🎙️', '🎚️', '🎛️', '🧭', '⏱️', '⏲️', '⏰', '🕰️', '⌛', '⏳', '📡', '🔋', '🔌', '💡', '🔦', '🕯️', '🪔', '🧯', '🛢️', '💸', '💵', '💴', '💶', '💷', '🪙', '💰', '💳', '🧾', '💎', '⚖️', '🧰', '🪛', '🔧', '🔨', '⚒️', '🛠️', '⛏️', '🪚', '🔩', '⚙️', '🪤', '🧱', '⛓️', '🧲', '🔫', '💣', '🧨', '🪓', '🔪', '🗡️', '⚔️', '🛡️', '🚬', '⚰️', '🪦', '⚱️', '🏺', '🔮', '📿', '🧿', '💈', '⚗️', '🔭', '🔬', '🕳️', '🩹', '🩺', '💊', '💉', '🩸', '🧬', '🦠', '🧫', '🧪', '🌡️', '🧹', '🪠', '🧺', '🧻', '🚽', '🚰', '🚿', '🛁', '🛀', '🧼', '🪥', '🪒', '🧽', '🪣', '🧴'],
+    symbols: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟', '☮️', '✝️', '☪️', '🕉️', '☸️', '✡️', '🔯', '🕎', '☯️', '☦️', '🛐', '⛎', '♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓', '🆔', '⚛️', '🉑', '☢️', '☣️', '📴', '📳', '🈶', '🈚', '🈸', '🈺', '🈷️', '✴️', '🆚', '💮', '🉐', '㊙️', '㊗️', '🈴', '🈵', '🈹', '🈲', '🅰️', '🅱️', '🆎', '🆑', '🅾️', '🆘', '❌', '⭕', '🛑', '⛔', '📛', '🚫', '💯', '💢', '♨️', '🚷', '🚯', '🚳', '🚱', '🔞', '📵', '🚭', '❗', '❕', '❓', '❔', '‼️', '⁉️', '🔅', '🔆', '〽️', '⚠️', '🚸', '🔱', '⚜️', '🔰', '♻️', '✅', '🈯', '💹', '❇️', '✳️', '❎', '🌐', '💠', 'Ⓜ️', '🌀', '💤', '🏧', '🚾', '♿', '🅿️', '🛗', '🈳', '🈂️', '🛂', '🛃', '🛄', '🛅', '🚹', '🚺', '🚼', '⚧️', '🚻', '🚮', '🎦', '📶', '🈁', '🔣', 'ℹ️', '🔤', '🔡', '🔠', '🆖', '🆗', '🆙', '🆒', '🆕', '🆓']
+};
+
+const emojiGrid = document.getElementById('emojiGrid');
+const selectedEmojiDisplay = document.getElementById('selectedEmojiDisplay');
+
 function vibrate(duration = 10) {
     if ('vibrate' in navigator) {
         navigator.vibrate(duration);
     }
 }
 
-document.querySelectorAll('.emoji-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        selectedEmoji = btn.dataset.emoji;
-        vibrate(20);
+function loadEmojiCategory(category) {
+    emojiGrid.innerHTML = '';
+    const emojis = emojiCategories[category] || emojiCategories.popular;
+    
+    emojis.forEach(emoji => {
+        const btn = document.createElement('button');
+        btn.className = 'emoji-btn';
+        btn.dataset.emoji = emoji;
+        btn.textContent = emoji;
+        
+        if (emoji === selectedEmoji) {
+            btn.classList.add('selected');
+        }
+        
+        btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedEmoji = emoji;
+            selectedEmojiDisplay.textContent = emoji;
+            vibrate(20);
+        });
+        
+        emojiGrid.appendChild(btn);
+    });
+}
+
+// Загружаем популярные emoji по умолчанию
+loadEmojiCategory('popular');
+
+// Обработчики для табов
+document.querySelectorAll('.emoji-tab').forEach(tab => {
+    tab.addEventListener('click', (e) => {
+        document.querySelectorAll('.emoji-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const category = tab.dataset.category;
+        loadEmojiCategory(category);
     });
 });
 
@@ -148,6 +191,24 @@ function showError(message) {
     }, 3000);
 }
 
+function showModalError(message) {
+    const existingError = document.querySelector('.modal-error');
+    if (existingError) existingError.remove();
+    
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'modal-error error-message';
+    errorDiv.textContent = message;
+    errorDiv.style.cssText = 'margin-bottom: 10px;';
+    
+    const modalContent = document.querySelector('.modal-content');
+    modalContent.insertBefore(errorDiv, modalContent.querySelector('input'));
+    vibrate([50, 30, 50]);
+    
+    setTimeout(() => {
+        errorDiv.remove();
+    }, 3000);
+}
+
 function createParticles(x, y) {
     const particlesContainer = document.getElementById('particles');
     
@@ -206,12 +267,34 @@ async function submitSignature() {
     try {
         const signatureDataUrl = canvas.toDataURL('image/png');
         
-        const signaturesCount = await db.collection('signatures').get();
-        const orderNumber = signaturesCount.size + 1;
+        // Получаем последний номер из базы данных
+        const lastSignature = await db.collection('signatures')
+            .orderBy('orderNumber', 'desc')
+            .limit(1)
+            .get();
+        
+        let orderNumber = 1;
+        if (!lastSignature.empty) {
+            const lastNumber = lastSignature.docs[0].data().orderNumber;
+            orderNumber = (lastNumber || 0) + 1;
+        }
+        
+        // Проверяем на дубликаты по имени и фамилии
+        const existingUser = await db.collection('signatures')
+            .where('name', '==', name)
+            .where('surname', '==', surname)
+            .get();
+            
+        if (!existingUser.empty) {
+            showError('Ты уже подписал кодекс! Можно подписать только один раз.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Подписать';
+            return;
+        }
         
         await db.collection('signatures').add({
-            name: name,
-            surname: surname,
+            name: name.substring(0, 50), // Ограничиваем длину
+            surname: surname.substring(0, 50), // Ограничиваем длину
             emoji: selectedEmoji,
             signature: signatureDataUrl,
             orderNumber: orderNumber,
@@ -251,7 +334,16 @@ async function submitSignature() {
         
     } catch (error) {
         console.error('Error:', error);
-        showError('Ошибка при сохранении. Попробуй ещё раз');
+        
+        if (error.code === 'unavailable') {
+            showError('Нет подключения к серверу. Проверь интернет-соединение.');
+        } else if (error.code === 'permission-denied') {
+            showError('Недостаточно прав для сохранения. Обратись к администратору.');
+        } else if (error.code === 'resource-exhausted') {
+            showError('Превышен лимит запросов. Попробуй позже.');
+        } else {
+            showError('Ошибка при сохранении. Попробуй ещё раз.');
+        }
     } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Подписать';
@@ -263,14 +355,17 @@ submitBtn.addEventListener('click', submitSignature);
 async function checkPassword(password) {
     try {
         const configDoc = await db.collection('config').doc('settings').get();
-        if (configDoc.exists) {
-            const data = configDoc.data();
-            return password === data.viewPassword;
+        if (!configDoc.exists) {
+            throw new Error('Настройки не найдены. Обратитесь к администратору.');
         }
-        return password === 'hookah2025';
+        const data = configDoc.data();
+        if (!data.viewPassword) {
+            throw new Error('Пароль не установлен. Обратитесь к администратору.');
+        }
+        return password === data.viewPassword;
     } catch (error) {
         console.error('Error checking password:', error);
-        return password === 'hookah2025';
+        throw error;
     }
 }
 
@@ -287,18 +382,28 @@ viewSignaturesBtn.addEventListener('click', () => {
 passwordSubmit.addEventListener('click', async () => {
     const password = passwordInput.value;
     
-    if (await checkPassword(password)) {
-        isAuthenticated = true;
-        passwordModal.classList.remove('active');
-        signaturesList.style.display = 'grid';
-        viewSignaturesBtn.style.display = 'none';
-        loadSignatures();
-        
-        localStorage.setItem('hookah_auth', 'true');
-        localStorage.setItem('hookah_auth_time', Date.now());
-    } else {
-        showError('Неверный пароль!');
-        passwordInput.value = '';
+    try {
+        const isValid = await checkPassword(password);
+        if (isValid) {
+            isAuthenticated = true;
+            passwordModal.classList.remove('active');
+            signaturesList.style.display = 'grid';
+            viewSignaturesBtn.style.display = 'none';
+            loadSignatures();
+            
+            try {
+                localStorage.setItem('hookah_auth', 'true');
+                localStorage.setItem('hookah_auth_time', Date.now().toString());
+            } catch (error) {
+                console.error('Error saving to localStorage:', error);
+                // Продолжаем работу, но без сохранения состояния
+            }
+        } else {
+            showModalError('Неверный пароль!');
+            passwordInput.value = '';
+        }
+    } catch (error) {
+        showModalError(error.message || 'Ошибка проверки пароля');
     }
 });
 
@@ -313,12 +418,18 @@ passwordInput.addEventListener('keypress', (e) => {
     }
 });
 
-const authCache = localStorage.getItem('hookah_auth');
-const authTime = localStorage.getItem('hookah_auth_time');
-if (authCache === 'true' && authTime && (Date.now() - parseInt(authTime) < 3600000)) {
-    isAuthenticated = true;
-    signaturesList.style.display = 'grid';
-    viewSignaturesBtn.style.display = 'none';
+// Проверяем localStorage с обработкой ошибок
+try {
+    const authCache = localStorage.getItem('hookah_auth');
+    const authTime = localStorage.getItem('hookah_auth_time');
+    if (authCache === 'true' && authTime && (Date.now() - parseInt(authTime) < 3600000)) {
+        isAuthenticated = true;
+        signaturesList.style.display = 'grid';
+        viewSignaturesBtn.style.display = 'none';
+    }
+} catch (error) {
+    console.error('Error accessing localStorage:', error);
+    // Продолжаем работу без сохранённой авторизации
 }
 
 async function loadSignatures() {
@@ -374,7 +485,14 @@ function createSignatureCard(data) {
     card.className = 'signature-card';
     card.dataset.id = data.id;
     
-    const date = data.timestamp ? data.timestamp.toDate() : new Date();
+    let date;
+    try {
+        date = data.timestamp && data.timestamp.toDate ? data.timestamp.toDate() : new Date();
+    } catch (error) {
+        console.error('Error parsing timestamp:', error);
+        date = new Date();
+    }
+    
     const dateStr = date.toLocaleDateString('ru-RU', {
         day: 'numeric',
         month: 'short',

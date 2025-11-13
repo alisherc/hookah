@@ -1,0 +1,37 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Правила для коллекции подписей
+    match /signatures/{signature} {
+      // Разрешаем чтение только авторизованным пользователям
+      // (в будущем можно добавить Firebase Auth)
+      allow read: if true;
+      
+      // Разрешаем создание новых записей всем
+      // Но с ограничениями на поля
+      allow create: if request.resource.data.keys().hasAll(['name', 'surname', 'emoji', 'signature', 'orderNumber', 'timestamp'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() <= 50
+        && request.resource.data.surname is string
+        && request.resource.data.surname.size() <= 50
+        && request.resource.data.emoji is string
+        && request.resource.data.emoji.size() <= 10
+        && request.resource.data.signature is string
+        && request.resource.data.signature.size() <= 1000000  // Максимум 1MB для base64 изображения
+        && request.resource.data.orderNumber is int
+        && request.resource.data.timestamp == request.time;
+      
+      // Запрещаем обновление и удаление
+      allow update: if false;
+      allow delete: if false;
+    }
+    
+    // Правила для настроек
+    match /config/{document} {
+      // Разрешаем только чтение настроек
+      allow read: if true;
+      // Запрещаем изменение через клиент
+      allow write: if false;
+    }
+  }
+}

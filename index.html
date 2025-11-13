@@ -111,18 +111,19 @@
                 
                 <div class="emoji-selector">
                     <p class="emoji-label">Выбери свой vibe:</p>
-                    <div class="emoji-grid">
-                        <button class="emoji-btn" data-emoji="😎">😎</button>
-                        <button class="emoji-btn" data-emoji="🔥">🔥</button>
-                        <button class="emoji-btn" data-emoji="💨">💨</button>
-                        <button class="emoji-btn" data-emoji="👑">👑</button>
-                        <button class="emoji-btn" data-emoji="🌙">🌙</button>
-                        <button class="emoji-btn" data-emoji="⚡">⚡</button>
-                        <button class="emoji-btn" data-emoji="💎">💎</button>
-                        <button class="emoji-btn" data-emoji="🎯">🎯</button>
-                        <button class="emoji-btn" data-emoji="🚀">🚀</button>
-                        <button class="emoji-btn" data-emoji="🌟">🌟</button>
+                    <div class="emoji-tabs">
+                        <button class="emoji-tab active" data-category="popular">Популярные</button>
+                        <button class="emoji-tab" data-category="smileys">Смайлы</button>
+                        <button class="emoji-tab" data-category="animals">Животные</button>
+                        <button class="emoji-tab" data-category="food">Еда</button>
+                        <button class="emoji-tab" data-category="nature">Природа</button>
+                        <button class="emoji-tab" data-category="objects">Предметы</button>
+                        <button class="emoji-tab" data-category="symbols">Символы</button>
                     </div>
+                    <div class="emoji-grid" id="emojiGrid">
+                        <!-- Emoji будут загружены через JavaScript -->
+                    </div>
+                    <div class="selected-emoji-display" id="selectedEmojiDisplay"></div>
                 </div>
                 
                 <div class="canvas-wrapper">

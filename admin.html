@@ -223,13 +223,19 @@
             
             try {
                 const configDoc = await db.collection('config').doc('settings').get();
-                let adminPassword = 'admin2025';
                 
-                if (configDoc.exists && configDoc.data().adminPassword) {
-                    adminPassword = configDoc.data().adminPassword;
+                if (!configDoc.exists) {
+                    alert('Настройки не найдены. Обратитесь к администратору.');
+                    return;
                 }
                 
-                if (password === adminPassword) {
+                const data = configDoc.data();
+                if (!data.adminPassword) {
+                    alert('Админский пароль не установлен. Обратитесь к администратору.');
+                    return;
+                }
+                
+                if (password === data.adminPassword) {
                     isAdmin = true;
                     document.getElementById('authForm').style.display = 'none';
                     document.getElementById('adminPanel').classList.add('active');
@@ -240,7 +246,7 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Ошибка входа');
+                alert('Ошибка входа: ' + (error.message || 'Неизвестная ошибка'));
             }
         }
         
@@ -262,22 +268,46 @@
                     const data = doc.data();
                     
                     if (data.timestamp) {
-                        const signDate = data.timestamp.toDate();
-                        if (signDate >= today) todayCount++;
-                        if (!lastTime || signDate > lastTime) lastTime = signDate;
+                        try {
+                            const signDate = data.timestamp.toDate ? data.timestamp.toDate() : new Date(data.timestamp);
+                            if (signDate >= today) todayCount++;
+                            if (!lastTime || signDate > lastTime) lastTime = signDate;
+                        } catch (error) {
+                            console.error('Error parsing timestamp:', error);
+                        }
                     }
                     
                     const item = document.createElement('div');
                     item.className = 'signature-item';
-                    item.innerHTML = `
-                        <div class="signature-info">
-                            <span>#${data.orderNumber}</span>
-                            <span>${data.emoji || ''}</span>
-                            <strong>${data.name} ${data.surname || ''}</strong>
-                            <img src="${data.signature}" class="signature-thumb">
-                        </div>
-                        <button class="delete-btn" onclick="deleteSignature('${doc.id}')">Удалить</button>
-                    `;
+                    
+                    const info = document.createElement('div');
+                    info.className = 'signature-info';
+                    
+                    const orderSpan = document.createElement('span');
+                    orderSpan.textContent = `#${data.orderNumber}`;
+                    
+                    const emojiSpan = document.createElement('span');
+                    emojiSpan.textContent = data.emoji || '';
+                    
+                    const nameStrong = document.createElement('strong');
+                    nameStrong.textContent = `${data.name} ${data.surname || ''}`;
+                    
+                    const img = document.createElement('img');
+                    img.src = data.signature;
+                    img.className = 'signature-thumb';
+                    
+                    info.appendChild(orderSpan);
+                    info.appendChild(emojiSpan);
+                    info.appendChild(nameStrong);
+                    info.appendChild(img);
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'delete-btn';
+                    deleteBtn.textContent = 'Удалить';
+                    deleteBtn.onclick = () => deleteSignature(doc.id);
+                    
+                    item.appendChild(info);
+                    item.appendChild(deleteBtn);
                     signaturesList.appendChild(item);
                 });
                 
