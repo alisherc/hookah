@@ -4,6 +4,11 @@
     box-sizing: border-box;
 }
 
+html {
+    overflow-x: hidden;
+    height: 100%;
+}
+
 :root {
     --primary-color: #1a1a2e;
     --secondary-color: #16213e;
@@ -21,39 +26,39 @@ body {
     min-height: 100vh;
     position: relative;
     overflow-x: hidden;
+    margin: 0;
+    padding: 0;
 }
 
 /* Реалистичный дымный фон */
 #smokeCanvas {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    min-height: 100vh;
-    height: 100%;
+    height: 100vh;
     pointer-events: none;
     z-index: 1;
     opacity: 1;
 }
 
 .animated-smoke-container {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    min-height: 100vh;
-    height: 100%;
+    height: 100vh;
     pointer-events: none;
     z-index: 2;
-    overflow: visible;
+    overflow: hidden;
 }
 
 .smoke-bg {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 100vh;
     pointer-events: none;
     background: 
         radial-gradient(circle at 20% 50%, rgba(255,255,255,0.02) 0%, transparent 50%),
@@ -326,6 +331,7 @@ body {
     max-width: 900px;
     margin: 0 auto;
     padding: 20px;
+    padding-bottom: 0;
     position: relative;
     z-index: 10;
 }
@@ -457,22 +463,12 @@ body {
     gap: 5px;
     margin-bottom: 15px;
     overflow-x: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--accent-color) transparent;
+    scrollbar-width: none; /* Скрываем скроллбар в Firefox */
+    -ms-overflow-style: none; /* Скрываем скроллбар в IE и Edge */
 }
 
 .emoji-tabs::-webkit-scrollbar {
-    height: 6px;
-}
-
-.emoji-tabs::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 3px;
-}
-
-.emoji-tabs::-webkit-scrollbar-thumb {
-    background: var(--accent-color);
-    border-radius: 3px;
+    display: none; /* Скрываем скроллбар в Chrome, Safari и Opera */
 }
 
 .emoji-tab {
@@ -504,22 +500,12 @@ body {
     max-height: 200px;
     overflow-y: auto;
     padding: 5px;
-    scrollbar-width: thin;
-    scrollbar-color: var(--accent-color) transparent;
+    scrollbar-width: none; /* Скрываем скроллбар в Firefox */
+    -ms-overflow-style: none; /* Скрываем скроллбар в IE и Edge */
 }
 
 .emoji-grid::-webkit-scrollbar {
-    width: 6px;
-}
-
-.emoji-grid::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 3px;
-}
-
-.emoji-grid::-webkit-scrollbar-thumb {
-    background: var(--accent-color);
-    border-radius: 3px;
+    display: none; /* Скрываем скроллбар в Chrome, Safari и Opera */
 }
 
 .emoji-btn {
@@ -700,7 +686,6 @@ body {
     backdrop-filter: blur(10px);
     border-radius: 20px;
     padding: 40px;
-    padding-bottom: 40px;
     margin-bottom: 60px;
     position: relative;
     z-index: 10;
@@ -913,9 +898,10 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 100vh;
     pointer-events: none;
     z-index: 1;
+    overflow: hidden;
 }
 
 .particle {
@@ -1118,5 +1104,71 @@ body {
     100% {
         transform: translate(-50%, -50%) scale(1) rotate(360deg);
         opacity: 0;
+    }
+}
+
+/* Исправления для отступов */
+@media (max-width: 768px) {
+    body {
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .smoke-bg,
+    #smokeCanvas,
+    .animated-smoke-container,
+    .particles {
+        position: fixed;
+        width: 100vw;
+        max-width: 100%;
+    }
+}
+
+/* Убираем возможные отступы от дыма внизу страницы */
+.extra-smoke {
+    bottom: 0;
+    transform-origin: bottom center;
+}
+
+/* Фикс для footer */
+.footer {
+    margin-bottom: 0;
+    padding-bottom: 40px;
+}
+
+/* Предотвращаем выход анимаций за границы */
+main {
+    overflow: hidden;
+    position: relative;
+}
+
+/* Дополнительные исправления для viewport */
+html, body {
+    max-width: 100vw;
+    overflow-x: hidden;
+}
+
+/* Убираем возможность горизонтального скролла на всех устройствах */
+* {
+    max-width: 100vw;
+}
+
+/* Фикс для мобильных устройств */
+@supports (-webkit-touch-callout: none) {
+    /* iOS Safari */
+    body {
+        width: 100%;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Предотвращаем выход контента за границы на iOS */
+    .smoke-bg,
+    #smokeCanvas,
+    .animated-smoke-container,
+    .particles {
+        right: 0;
+        left: 0;
     }
 }

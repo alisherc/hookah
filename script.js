@@ -189,11 +189,11 @@ function initSmokeCanvas() {
     const ctx = smokeCanvas.getContext('2d');
     
     let particles = [];
-    const maxParticles = 350; // Увеличил количество частиц
+    const maxParticles = 100; // Увеличил количество частиц
     
     function resizeCanvas() {
         smokeCanvas.width = window.innerWidth;
-        smokeCanvas.height = document.documentElement.scrollHeight;
+        smokeCanvas.height = window.innerHeight; // Используем высоту viewport, а не scrollHeight
     }
     
     resizeCanvas();
@@ -206,7 +206,7 @@ function initSmokeCanvas() {
             this.x = Math.random() * smokeCanvas.width;
             // Распределяем частицы по всей высоте страницы
             this.y = Math.random() * smokeCanvas.height;
-            this.size = Math.random() * 100 + 130; // Увеличил размер
+            this.size = Math.random() * 100 + 100; // Увеличил размер
             this.speedX = (Math.random() - 0.5) * 1.5;
             this.speedY = Math.random() * -2 - 1;
             this.opacity = 0;
