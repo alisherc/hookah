@@ -163,7 +163,202 @@ function clearCanvas() {
     setupCanvas();
 }
 
-clearBtn.addEventListener('click', clearCanvas);
+clearBtn.addEventListener('click', () => {
+    clearCanvas();
+    triggerSmokeEffect(clearBtn);
+});
+
+// Эффект дыма для всех кнопок
+function triggerSmokeEffect(button) {
+    button.classList.add('smoke-effect');
+    setTimeout(() => {
+        button.classList.remove('smoke-effect');
+    }, 1500);
+}
+
+// Добавляем эффект дыма для всех кнопок
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('btn')) {
+        triggerSmokeEffect(e.target);
+    }
+});
+
+// Реалистичный дым на canvas
+function initSmokeCanvas() {
+    const smokeCanvas = document.getElementById('smokeCanvas');
+    const ctx = smokeCanvas.getContext('2d');
+    
+    let particles = [];
+    const maxParticles = 350; // Увеличил количество частиц
+    
+    function resizeCanvas() {
+        smokeCanvas.width = window.innerWidth;
+        smokeCanvas.height = document.documentElement.scrollHeight;
+    }
+    
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    // Обновляем размер при изменении содержимого
+    window.addEventListener('load', resizeCanvas);
+    
+    class SmokeParticle {
+        constructor() {
+            this.x = Math.random() * smokeCanvas.width;
+            // Распределяем частицы по всей высоте страницы
+            this.y = Math.random() * smokeCanvas.height;
+            this.size = Math.random() * 100 + 130; // Увеличил размер
+            this.speedX = (Math.random() - 0.5) * 1.5;
+            this.speedY = Math.random() * -2 - 1;
+            this.opacity = 0;
+            this.life = 0;
+            this.maxLife = Math.random() * 150 + 250;
+            this.wobble = Math.random() * 0.02 + 0.005;
+        }
+        
+        update() {
+            this.life++;
+            this.y += this.speedY;
+            this.x += this.speedX + Math.sin(this.life * this.wobble) * 2;
+            this.size += 0.5;
+            
+            if (this.life < 40) {
+                this.opacity = this.life / 40 * 0.3; // Увеличил непрозрачность
+            } else if (this.life > this.maxLife - 60) {
+                this.opacity = (this.maxLife - this.life) / 60 * 0.3;
+            }
+            
+            this.speedY *= 0.985;
+            this.speedX *= 0.99;
+            
+            return this.life < this.maxLife && this.y > -this.size * 2;
+        }
+        
+        draw() {
+            ctx.save();
+            ctx.globalAlpha = this.opacity;
+            
+            const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
+            gradient.addColorStop(0.3, 'rgba(255, 255, 255, 0.2)');
+            gradient.addColorStop(0.6, 'rgba(212, 175, 55, 0.1)'); // Добавил золотой оттенок
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.restore();
+        }
+    }
+    
+    function animate() {
+        ctx.clearRect(0, 0, smokeCanvas.width, smokeCanvas.height);
+        
+        // Создаём больше частиц
+        if (Math.random() < 0.3 && particles.length < maxParticles) {
+            particles.push(new SmokeParticle());
+        }
+        
+        // Иногда создаём сразу несколько частиц для эффекта клубов дыма
+        if (Math.random() < 0.05) {
+            for (let i = 0; i < 3; i++) {
+                if (particles.length < maxParticles) {
+                    particles.push(new SmokeParticle());
+                }
+            }
+        }
+        
+        particles = particles.filter(particle => {
+            const alive = particle.update();
+            if (alive) particle.draw();
+            return alive;
+        });
+        
+        requestAnimationFrame(animate);
+    }
+    
+    animate();
+}
+
+// Инициализируем дым при загрузке страницы
+document.addEventListener('DOMContentLoaded', initSmokeCanvas);
+
+// Анимация появления при скролле
+function initScrollAnimations() {
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+    
+    document.querySelectorAll('.article, .signature-section, .signatures-list').forEach(el => {
+        observer.observe(el);
+    });
+}
+
+// Инициализируем анимации при загрузке
+document.addEventListener('DOMContentLoaded', () => {
+    initScrollAnimations();
+    
+    // Добавляем первым элементам класс visible сразу
+    document.querySelectorAll('.article:first-child').forEach(el => {
+        setTimeout(() => el.classList.add('visible'), 100);
+    });
+});
+
+// Добавляем случайные искры
+function createSparkle(x, y) {
+    const sparkle = document.createElement('div');
+    sparkle.style.cssText = `
+        position: fixed;
+        left: ${x}px;
+        top: ${y}px;
+        width: 4px;
+        height: 4px;
+        background: ${Math.random() > 0.5 ? '#d4af37' : '#fff'};
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+        animation: sparkle-fall 1s ease-out forwards;
+    `;
+    document.body.appendChild(sparkle);
+    setTimeout(() => sparkle.remove(), 1000);
+}
+
+// Добавляем стили для искр
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes sparkle-fall {
+        0% {
+            transform: translateY(0) translateX(0);
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(50px) translateX(${(Math.random() - 0.5) * 100}px);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
+
+// Создаём искры при движении мыши (редко)
+let lastSparkleTime = 0;
+document.addEventListener('mousemove', (e) => {
+    const now = Date.now();
+    if (now - lastSparkleTime > 200 && Math.random() < 0.1) {
+        createSparkle(e.clientX, e.clientY);
+        lastSparkleTime = now;
+    }
+});
 
 function isCanvasEmpty() {
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -503,10 +698,12 @@ function createSignatureCard(data) {
     
     const orderClass = data.orderNumber <= 5 ? 'founder' : '';
     
+    const surnameInitial = data.surname ? escapeHtml(data.surname.charAt(0).toUpperCase()) + '.' : '';
+    
     card.innerHTML = `
         <div class="signature-order-number ${orderClass}">#${data.orderNumber}</div>
         <div class="signature-emoji">${data.emoji || '😎'}</div>
-        <div class="signature-card-name">${escapeHtml(data.name)} ${escapeHtml(data.surname || '')}</div>
+        <div class="signature-card-name">${escapeHtml(data.name)} ${surnameInitial}</div>
         <img src="${data.signature}" alt="Подпись" class="signature-card-image">
         <div class="signature-card-date">${dateStr}</div>
     `;

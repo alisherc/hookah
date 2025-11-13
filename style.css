@@ -16,25 +16,203 @@
 
 body {
     font-family: 'Inter', sans-serif;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background: linear-gradient(135deg, #0a0a0f 0%, #0f1419 100%);
     color: var(--text-light);
     min-height: 100vh;
     position: relative;
     overflow-x: hidden;
 }
 
+/* Реалистичный дымный фон */
+#smokeCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-height: 100vh;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 1;
+}
+
+.animated-smoke-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-height: 100vh;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+    overflow: visible;
+}
+
 .smoke-bg {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     pointer-events: none;
     background: 
-        radial-gradient(circle at 20% 50%, var(--smoke) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, var(--smoke) 0%, transparent 50%),
-        radial-gradient(circle at 40% 20%, var(--smoke) 0%, transparent 50%);
+        radial-gradient(circle at 20% 50%, rgba(255,255,255,0.02) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.02) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(255,255,255,0.02) 0%, transparent 50%);
     animation: float 20s ease-in-out infinite;
+}
+
+/* CSS анимированный дым */
+.animated-smoke-container::before,
+.animated-smoke-container::after,
+.animated-smoke-container > div {
+    content: '';
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    filter: blur(60px);
+}
+
+.animated-smoke-container::before {
+    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+    bottom: -200px;
+    left: -100px;
+    animation: smoke-rise-1 12s ease-out infinite;
+}
+
+.animated-smoke-container::after {
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+    bottom: -150px;
+    right: -150px;
+    animation: smoke-rise-2 14s ease-out infinite;
+}
+
+@keyframes smoke-rise-1 {
+    0% {
+        transform: translateY(0) translateX(0) scale(0.8);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.3;
+    }
+    70% {
+        opacity: 0.15;
+    }
+    100% {
+        transform: translateY(-100vh) translateX(100px) scale(3);
+        opacity: 0;
+    }
+}
+
+@keyframes smoke-rise-2 {
+    0% {
+        transform: translateY(0) translateX(0) scale(0.8);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.25;
+    }
+    70% {
+        opacity: 0.1;
+    }
+    100% {
+        transform: translateY(-100vh) translateX(-150px) scale(3.5);
+        opacity: 0;
+    }
+}
+
+/* Дополнительные слои дыма */
+.extra-smoke {
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    filter: blur(80px);
+}
+
+.extra-smoke-1 {
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+    bottom: -250px;
+    left: 20%;
+    animation: smoke-rise-3 16s ease-out infinite;
+}
+
+.extra-smoke-2 {
+    background: radial-gradient(circle, rgba(212,175,55,0.1) 0%, transparent 65%);
+    bottom: -200px;
+    right: 20%;
+    animation: smoke-rise-4 20s ease-out infinite;
+}
+
+.extra-smoke-3 {
+    background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 60%);
+    bottom: -300px;
+    left: 60%;
+    animation: smoke-rise-5 15s ease-out infinite;
+}
+
+.extra-smoke-4 {
+    background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
+    bottom: -180px;
+    right: 40%;
+    animation: smoke-rise-6 18s ease-out infinite;
+}
+
+@keyframes smoke-rise-3 {
+    0% {
+        transform: translateY(0) translateX(0) scale(0.6) rotate(0deg);
+        opacity: 0;
+    }
+    15% {
+        opacity: 0.3;
+    }
+    100% {
+        transform: translateY(-120vh) translateX(200px) scale(4) rotate(180deg);
+        opacity: 0;
+    }
+}
+
+@keyframes smoke-rise-4 {
+    0% {
+        transform: translateY(0) translateX(0) scale(0.7) rotate(0deg);
+        opacity: 0;
+    }
+    20% {
+        opacity: 0.25;
+    }
+    100% {
+        transform: translateY(-110vh) translateX(-180px) scale(3.5) rotate(-120deg);
+        opacity: 0;
+    }
+}
+
+@keyframes smoke-rise-5 {
+    0% {
+        transform: translateY(0) translateX(0) scale(0.5);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.35;
+    }
+    100% {
+        transform: translateY(-130vh) translateX(-100px) scale(4.5);
+        opacity: 0;
+    }
+}
+
+@keyframes smoke-rise-6 {
+    0% {
+        transform: translateY(0) translateX(0) scale(0.8);
+        opacity: 0;
+    }
+    15% {
+        opacity: 0.2;
+    }
+    100% {
+        transform: translateY(-115vh) translateX(150px) scale(3.8);
+        opacity: 0;
+    }
 }
 
 @keyframes float {
@@ -48,17 +226,85 @@ body {
     padding: 60px 20px;
     background: linear-gradient(180deg, rgba(212,175,55,0.1) 0%, transparent 100%);
     position: relative;
+    z-index: 10;
 }
 
 .header-decoration {
-    font-size: 48px;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
     animation: pulse 2s ease-in-out infinite;
 }
 
+/* Изображение кальяна */
+.hookah-image {
+    width: 120px;
+    height: auto;
+    margin: 0 auto;
+    display: block;
+    filter: drop-shadow(0 5px 20px rgba(212, 175, 55, 0.5));
+    animation: hookah-float 3s ease-in-out infinite;
+}
+
+@keyframes hookah-float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+.hookah-smoke-container {
+    position: relative;
+    width: 120px;
+    margin: 0 auto;
+    height: 100px;
+    margin-top: -40px;
+}
+
+.hookah-smoke {
+    position: absolute;
+    bottom: 60%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(15px);
+    animation: hookah-smoke-rise 4s ease-out infinite;
+}
+
+.hookah-smoke-2 {
+    animation-delay: 1.3s;
+    left: 45%;
+    width: 35px;
+    height: 35px;
+}
+
+.hookah-smoke-3 {
+    animation-delay: 2.6s;
+    left: 55%;
+    width: 30px;
+    height: 30px;
+}
+
+@keyframes hookah-smoke-rise {
+    0% {
+        transform: translateX(-50%) translateY(0) scale(0.3);
+        opacity: 0;
+    }
+    20% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateX(-50%) translateY(-100px) scale(2);
+        opacity: 0;
+    }
+}
+
+
 @keyframes pulse {
-    0%, 100% { opacity: 0.6; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.1); }
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
 }
 
 .main-title {
@@ -80,16 +326,18 @@ body {
     max-width: 900px;
     margin: 0 auto;
     padding: 20px;
+    position: relative;
+    z-index: 10;
 }
 
 .codex-content {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(10, 10, 15, 0.8);
     backdrop-filter: blur(10px);
     border-radius: 20px;
     padding: 40px;
     margin-bottom: 60px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.15);
 }
 
 .article {
@@ -138,13 +386,13 @@ body {
 }
 
 .signature-section {
-    background: rgba(233, 69, 96, 0.1);
+    background: rgba(15, 10, 15, 0.85);
     backdrop-filter: blur(10px);
     border-radius: 20px;
     padding: 40px;
     margin-bottom: 60px;
     border: 2px solid var(--accent-color);
-    box-shadow: 0 8px 32px rgba(233, 69, 96, 0.2);
+    box-shadow: 0 8px 32px rgba(233, 69, 96, 0.3);
 }
 
 .signature-title {
@@ -359,6 +607,8 @@ body {
     transition: all 0.3s ease;
     text-transform: uppercase;
     letter-spacing: 1px;
+    position: relative;
+    overflow: visible;
 }
 
 .btn-secondary {
@@ -389,12 +639,71 @@ body {
     transform: none;
 }
 
+/* Эффект дыма для кнопок */
+.btn::before,
+.btn::after {
+    content: '';
+    position: absolute;
+    opacity: 0;
+    filter: blur(20px);
+    transform: translateY(0);
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.btn::before {
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+    bottom: -30px;
+    left: 20%;
+}
+
+.btn::after {
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, transparent 70%);
+    bottom: -20px;
+    right: 20%;
+}
+
+.btn.smoke-effect::before,
+.btn.smoke-effect::after {
+    animation: button-smoke 1.5s ease-out;
+}
+
+@keyframes button-smoke {
+    0% {
+        opacity: 0;
+        transform: translateY(0) scale(0.5);
+    }
+    20% {
+        opacity: 0.6;
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-100px) scale(1.5);
+    }
+}
+
+/* Дополнительный эффект для primary кнопок */
+.btn-primary.smoke-effect::before {
+    background: radial-gradient(circle, rgba(233, 69, 96, 0.3) 0%, transparent 70%);
+}
+
+.btn-primary.smoke-effect::after {
+    background: radial-gradient(circle, rgba(233, 69, 96, 0.25) 0%, transparent 70%);
+}
+
 .signatures-list {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(10, 10, 15, 0.8);
     backdrop-filter: blur(10px);
     border-radius: 20px;
     padding: 40px;
+    padding-bottom: 40px;
     margin-bottom: 60px;
+    position: relative;
+    z-index: 10;
 }
 
 .list-title {
@@ -409,18 +718,30 @@ body {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 20px;
+    grid-auto-rows: max-content;
+    align-content: start;
+    min-height: 0;
+    height: auto;
 }
 
 .signature-card {
     background: rgba(255, 255, 255, 0.08);
     border-radius: 15px;
-    padding: 20px;
+    padding: 20px 20px 15px 20px;
     text-align: center;
     transition: all 0.3s ease;
     border: 1px solid rgba(255, 255, 255, 0.1);
     animation: fadeIn 0.5s ease;
     position: relative;
     overflow: hidden;
+    margin: 0;
+    box-shadow: none;
+    transform: none;
+}
+
+.signature-card > * {
+    margin: 0;
+    padding: 0;
 }
 
 .signature-card::before {
@@ -450,7 +771,6 @@ body {
     padding: 5px 10px;
     border-radius: 20px;
     font-size: 14px;
-    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.4);
 }
 
 .signature-order-number.founder {
@@ -459,8 +779,8 @@ body {
 }
 
 @keyframes shine {
-    0%, 100% { box-shadow: 0 2px 8px rgba(255, 107, 107, 0.4); }
-    50% { box-shadow: 0 2px 20px rgba(255, 107, 107, 0.8); }
+    0%, 100% { opacity: 0.9; }
+    50% { opacity: 1; }
 }
 
 .signature-emoji {
@@ -469,14 +789,12 @@ body {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 .signature-card:hover {
-    transform: translateY(-5px);
     background: rgba(255, 255, 255, 0.12);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
 }
 
 .signature-card-name {
@@ -498,6 +816,7 @@ body {
 .signature-card-date {
     font-size: 12px;
     color: rgba(245, 245, 245, 0.5);
+    margin: 0;
 }
 
 .loading {
@@ -511,6 +830,21 @@ body {
     padding: 40px 20px;
     color: rgba(245, 245, 245, 0.5);
     font-size: 14px;
+    position: relative;
+    z-index: 10;
+}
+
+.footer p {
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+.footer .copyright {
+    margin-top: 20px;
+    font-size: 12px;
+    color: rgba(245, 245, 245, 0.4);
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .modal {
@@ -533,11 +867,11 @@ body {
 }
 
 .modal-content {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background: linear-gradient(135deg, #0a0a0f 0%, #0f1419 100%);
     padding: 30px;
     border-radius: 20px;
     border: 2px solid var(--accent-color);
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
     animation: slideUp 0.3s ease;
 }
 
@@ -650,4 +984,138 @@ body {
     0%, 100% { transform: translateX(0); }
     25% { transform: translateX(-5px); }
     75% { transform: translateX(5px); }
+}
+
+/* ВАУ эффекты */
+/* Эффект появления при скролле */
+.article, .signature-section, .signatures-list {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.article.visible, .signature-section.visible, .signatures-list.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Легкое свечение при hover на статьи */
+.article:hover {
+    background: linear-gradient(135deg, transparent 0%, rgba(212, 175, 55, 0.03) 50%, transparent 100%);
+    border-radius: 20px;
+}
+
+/* Анимированные частицы в заголовке */
+@keyframes float-particle {
+    0% {
+        transform: translateY(0) translateX(0) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.8;
+    }
+    90% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(-200px) translateX(100px) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+.header::before,
+.header::after {
+    content: '✨';
+    position: absolute;
+    font-size: 20px;
+    animation: float-particle 10s linear infinite;
+    pointer-events: none;
+}
+
+.header::before {
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.header::after {
+    right: 10%;
+    animation-delay: 5s;
+}
+
+/* Эффект пульсации для важных элементов */
+.signature-order-number.founder {
+    animation: shine 2s infinite, pulse-scale 2s ease-in-out infinite;
+}
+
+@keyframes pulse-scale {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* Hover эффект для emoji кнопок с вращением */
+.emoji-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1) rotate(10deg);
+    animation: emoji-bounce 0.5s ease;
+}
+
+@keyframes emoji-bounce {
+    0% { transform: scale(1) rotate(0); }
+    50% { transform: scale(1.2) rotate(-5deg); }
+    100% { transform: scale(1.1) rotate(10deg); }
+}
+
+/* Магический эффект для canvas подписи */
+.canvas-wrapper:hover #signatureCanvas {
+    box-shadow: 
+        0 4px 12px rgba(0,0,0,0.2),
+        0 0 50px rgba(212, 175, 55, 0.3),
+        inset 0 0 30px rgba(212, 175, 55, 0.1);
+}
+
+/* Эффект радуги для выбранного emoji */
+.selected-emoji-display {
+    animation: rainbow 3s linear infinite;
+    background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #ff6b6b);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+@keyframes rainbow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Супер эффект успеха */
+.success-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--gold);
+    z-index: 3000;
+    animation: success-mega 2s ease;
+}
+
+@keyframes success-mega {
+    0% {
+        transform: translate(-50%, -50%) scale(0) rotate(0deg);
+        opacity: 0;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.5) rotate(180deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1) rotate(360deg);
+        opacity: 0;
+    }
 }
