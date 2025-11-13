@@ -523,6 +523,9 @@ async function submitSignature() {
         
         setTimeout(() => successDiv.remove(), 5000);
         
+        // Обновляем счетчик после успешной подписи
+        updateSignaturesCount();
+        
         if (isAuthenticated) {
             loadSignatures();
         }
@@ -584,6 +587,7 @@ passwordSubmit.addEventListener('click', async () => {
             passwordModal.classList.remove('active');
             signaturesList.style.display = 'grid';
             viewSignaturesBtn.style.display = 'none';
+            updateSignaturesCount();
             loadSignatures();
             
             try {
@@ -625,6 +629,27 @@ try {
 } catch (error) {
     console.error('Error accessing localStorage:', error);
     // Продолжаем работу без сохранённой авторизации
+}
+
+// Функция для обновления счетчика подписей (работает независимо от авторизации)
+async function updateSignaturesCount() {
+    const countElement = document.getElementById('signaturesCount');
+    if (!countElement) return;
+    
+    try {
+        const snapshot = await db.collection('signatures').get();
+        const count = snapshot.size;
+        countElement.textContent = count.toString();
+        
+        // Добавим анимацию при обновлении
+        countElement.style.animation = 'none';
+        setTimeout(() => {
+            countElement.style.animation = 'pulse 2s ease-in-out infinite';
+        }, 100);
+    } catch (error) {
+        console.error('Error loading signatures count:', error);
+        countElement.textContent = '?';
+    }
 }
 
 async function loadSignatures() {
@@ -731,6 +756,11 @@ window.addEventListener('resize', () => {
 
 setupCanvas();
 
+// Загружаем счетчик подписей сразу (для всех пользователей)
+updateSignaturesCount();
+setInterval(updateSignaturesCount, 30000);
+
+// Загружаем сами подписи только для авторизованных
 if (isAuthenticated) {
     loadSignatures();
     setInterval(loadSignatures, 30000);
