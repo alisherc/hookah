@@ -204,6 +204,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script>
+        console.log('Админка загружается...');
+        
         const firebaseConfig = {
             apiKey: "AIzaSyBcyP2Gmer-TWyEnDeCPqo6E4tptAuHdBQ",
             authDomain: "hookah-law.firebaseapp.com",
@@ -215,11 +217,13 @@
         
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        console.log('Firebase инициализирован');
         
         let isAdmin = false;
         
-        async function adminLogin() {
+        window.adminLogin = async function() {
             const password = document.getElementById('adminPassword').value;
+            console.log('Попытка входа в админку');
             
             try {
                 const configDoc = await db.collection('config').doc('settings').get();
@@ -250,7 +254,8 @@
             }
         }
         
-        async function loadAdminData() {
+        window.loadAdminData = async function() {
+            console.log('Загружаем данные админки');
             try {
                 const snapshot = await db.collection('signatures').orderBy('orderNumber', 'asc').get();
                 
@@ -330,19 +335,23 @@
             }
         }
         
-        async function deleteSignature(id) {
+        window.deleteSignature = async function(id) {
+            console.log('Удаляем подпись с ID:', id);
             if (!confirm('Точно удалить эту подпись?')) return;
             
             try {
                 await db.collection('signatures').doc(id).delete();
+                console.log('Подпись удалена успешно');
                 loadAdminData();
             } catch (error) {
-                alert('Ошибка при удалении');
+                console.error('Ошибка при удалении:', error);
+                alert('Ошибка при удалении: ' + (error.message || 'Неизвестная ошибка'));
             }
         }
         
-        async function updateViewPassword() {
+        window.updateViewPassword = async function() {
             const newPassword = document.getElementById('viewPasswordInput').value;
+            console.log('Обновляем пароль просмотра');
             if (!newPassword) {
                 alert('Введи новый пароль');
                 return;
@@ -352,14 +361,17 @@
                 await db.collection('config').doc('settings').set({
                     viewPassword: newPassword
                 }, { merge: true });
+                console.log('Пароль просмотра обновлён');
                 alert('Пароль обновлен!');
             } catch (error) {
-                alert('Ошибка при обновлении пароля');
+                console.error('Ошибка обновления пароля:', error);
+                alert('Ошибка при обновлении пароля: ' + (error.message || 'Проверьте права доступа'));
             }
         }
         
-        async function updateAdminPassword() {
+        window.updateAdminPassword = async function() {
             const newPassword = document.getElementById('adminPasswordInput').value;
+            console.log('Обновляем админский пароль');
             if (!newPassword) {
                 alert('Введи новый пароль');
                 return;
@@ -369,13 +381,16 @@
                 await db.collection('config').doc('settings').set({
                     adminPassword: newPassword
                 }, { merge: true });
+                console.log('Админский пароль обновлён');
                 alert('Админский пароль обновлен!');
             } catch (error) {
-                alert('Ошибка при обновлении пароля');
+                console.error('Ошибка обновления админского пароля:', error);
+                alert('Ошибка при обновлении пароля: ' + (error.message || 'Проверьте права доступа'));
             }
         }
         
-        async function exportData() {
+        window.exportData = async function() {
+            console.log('Экспортируем данные');
             try {
                 const snapshot = await db.collection('signatures').orderBy('orderNumber', 'asc').get();
                 const data = [];
@@ -394,12 +409,15 @@
                 a.href = url;
                 a.download = `signatures_${new Date().toISOString().split('T')[0]}.json`;
                 a.click();
+                console.log('Экспорт завершён');
             } catch (error) {
-                alert('Ошибка экспорта');
+                console.error('Ошибка экспорта:', error);
+                alert('Ошибка экспорта: ' + (error.message || 'Неизвестная ошибка'));
             }
         }
         
-        function logout() {
+        window.logout = function() {
+            console.log('Выходим из админки');
             sessionStorage.removeItem('admin_auth');
             location.reload();
         }
@@ -410,6 +428,15 @@
             document.getElementById('adminPanel').classList.add('active');
             loadAdminData();
         }
+        
+        console.log('Все функции админки загружены:', {
+            adminLogin: typeof window.adminLogin,
+            deleteSignature: typeof window.deleteSignature,
+            updateViewPassword: typeof window.updateViewPassword,
+            updateAdminPassword: typeof window.updateAdminPassword,
+            exportData: typeof window.exportData,
+            logout: typeof window.logout
+        });
     </script>
 </body>
 </html>
